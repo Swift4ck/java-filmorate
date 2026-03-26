@@ -6,15 +6,14 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RestController
 public class FilmController {
 
     private final Map<Integer, Film> films = new HashMap<>();
+    private int nexId = 1;
 
     @PostMapping("/films")
     public Film create(@RequestBody Film film) {
@@ -38,18 +37,19 @@ public class FilmController {
             throw new ValidationException("продолжительность фильма должна быть положительным числом.");
         }
 
-        log.info("Добавлен фильм" + film);
+        film.setId(nexId++);
+        log.info("Добавлен фильм: " + film);
         films.put(film.getId(), film);
         return film;
     }
 
-    @PutMapping("/films/{id}")
-    public Film update(@PathVariable("id") int id, @RequestBody Film updatedFilm) {
-        Film film = films.get(id);
-        if (film == null) {
+    @PutMapping("/films")
+    public Film update(@RequestBody Film updatedFilm) {
+        if (!films.containsKey(updatedFilm.getId())) {
             log.debug("Введен не существующий id");
             throw new ValidationException("Фильм с таким ID не найден.");
         }
+        Film film = films.get(updatedFilm.getId());
 
         if (updatedFilm.getName().isEmpty()) {
             log.debug("Пустое названия фильма");
@@ -76,14 +76,18 @@ public class FilmController {
         film.setReleaseDate(updatedFilm.getReleaseDate());
         film.setDuration(updatedFilm.getDuration());
 
-        log.info("Обновлена информацию по фильму" + film);
-        films.put(id, film);
+        log.info("Обновлена информацию по фильму: " + film);
         return film;
     }
 
-    @GetMapping
-    public Collection<Film> filmAll() {
-        return films.values();
+    @GetMapping("/films")
+    public List<Film> filmAll() {
+        return new ArrayList<>(films.values());
+    }
+
+    public void clearFilm() {
+        films.clear();
+        nexId = 1;
     }
 
 

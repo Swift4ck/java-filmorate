@@ -14,9 +14,10 @@ import java.util.*;
 public class UserController {
 
     private final Map<Integer, User> users = new HashMap<>();
+    private int nexId = 1;
 
     @PostMapping("/users")
-    public User create(@PathVariable("id") int id,@RequestBody User user) {
+    public User create(@RequestBody User user) {
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
             log.debug("Пользователь не ввел почту или email без @");
             throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
@@ -27,7 +28,7 @@ public class UserController {
             throw new ValidationException("логин не может быть пустым и содержать пробелы;");
         }
 
-        if (user.getName().isEmpty()) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             log.debug("Пользователь не ввел ник, ник теперь такой же как и логин");
             user.setName(user.getLogin());
         }
@@ -37,30 +38,27 @@ public class UserController {
             throw new ValidationException("дата рождения не может быть в будущем.");
         }
 
-        log.info("Пользователь создан" + user);
-        users.put(user.getId(),user);
+        user.setId(nexId++);
+        log.info("Пользователь создан; " + user);
+        users.put(user.getId(), user);
         return user;
     }
 
-    @PutMapping("/user/{id}")
-    public User update(@PathVariable("id") int id, @RequestBody User updateUser) {
-        User user = users.get(id);
-
-        if (user == null) {
-            throw new ValidationException("Пользователь с таким ID не найден.");
-        }
-
-        if (updateUser == null) {
+    @PutMapping("/users")
+    public User updateUser(@RequestBody User updateUser) {
+        if (!users.containsKey(updateUser.getId())) {
             log.debug("Введен не существующий id");
             throw new ValidationException("Пользователь с таким ID не найден.");
         }
+
+        User user = users.get(updateUser.getId());
 
         if (updateUser.getEmail() == null || !updateUser.getEmail().contains("@")) {
             log.debug("Пользователь не ввел почту или email без @");
             throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
         }
 
-        if (updateUser.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+        if (updateUser.getLogin().isEmpty() || updateUser.getLogin().contains(" ")) {
             log.debug("Пользователь не ввел логин или поставил пробел");
             throw new ValidationException("логин не может быть пустым и содержать пробелы;");
         }
@@ -87,6 +85,11 @@ public class UserController {
     @GetMapping("/users")
     public Collection<User> userAll() {
         return users.values();
+    }
+
+    public void clearUser() {
+        users.clear();
+        nexId = 1;
     }
 
 

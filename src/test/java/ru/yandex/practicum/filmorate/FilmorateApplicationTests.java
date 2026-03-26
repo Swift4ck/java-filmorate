@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate;
 
-import jakarta.xml.bind.ValidationException;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +28,12 @@ class FilmorateApplicationTests {
     @Autowired
     private UserController userController;
 
+
+    @AfterEach
+    void clear() {
+        filmController.clearFilm();
+        userController.clearUser();
+    }
 
     @Test
     void successfulFilmСreation() {
@@ -75,7 +82,7 @@ class FilmorateApplicationTests {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film newFilm = new Film(1, "Другое название", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film createFilm = filmController.create(film);
-        Film updateFilm = filmController.update(1, newFilm);
+        Film updateFilm = filmController.update(newFilm);
         assertEquals(newFilm, film, "Успешно обновляем фильм фильм");
     }
 
@@ -84,7 +91,7 @@ class FilmorateApplicationTests {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film createFilm = filmController.create(film);
         Film newFilm = new Film(1, "", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.update(1, newFilm));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.update(newFilm));
         //Выбросить исключения при обновление по причине отсутствия названия
     }
 
@@ -96,7 +103,7 @@ class FilmorateApplicationTests {
         String longString = new String(new char[201]).replace('\0', 'X');
         newFilm.setDescription(longString);
 
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.update(1, newFilm));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.update(newFilm));
         //Выбросить исключения при обновление по причине  множества сиволов в описание
     }
 
@@ -105,7 +112,7 @@ class FilmorateApplicationTests {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film createFilm = filmController.create(film);
         Film newFilm = new Film(1, "Другое название", "Описание фильма", LocalDate.of(1000, 3, 24), 60);
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.update(1, newFilm));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.update(newFilm));
         //Выбросить исключения при обновление по причине некорректной даты
     }
 
@@ -114,7 +121,7 @@ class FilmorateApplicationTests {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film createFilm = filmController.create(film);
         Film newFilm = new Film(1, "Другое название", "Описание фильма", LocalDate.of(2025, 3, 24), -1);
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.update(1, newFilm));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.update(newFilm));
         //Выбросить исключения при обновление по причине отрицательного числа
     }
 
@@ -139,36 +146,36 @@ class FilmorateApplicationTests {
     void successUserСreation() {
         User user = new User(1, "sad@a.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
 
-        User createUser = userController.create(user.getId(), user);
+        User createUser = userController.create(user);
         assertEquals(user, createUser, "Успешно создаем пользователя");
     }
 
     @Test
     void verifyingTheValidationOfUserCreation() {
         User user = new User(1, "", "sw2", "qwer", LocalDate.of(2002, 2, 3));
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user.getId(), user));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user));
         //Выбросить исключение по причине пустого email
 
         user.setEmail("dawda");
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user.getId(), user));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user));
         //Выбросить исключения про причине отсутствие  @
 
         user.setEmail("pochta@poc.ru");
         user.setLogin("sw 2");
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user.getId(), user));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user));
         // Исключение Пользователь поставил пробел
 
         user.setLogin("");
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user.getId(), user));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user));
         // Исключение Пользователь оставил пустое поле логина
 
         user.setLogin("sw4");
         user.setName("");
-        User createUser = userController.create(user.getId(),user);
+        User createUser = userController.create(user);
         assertEquals(user.getName(), createUser.getName(), "проверка что ник стал как логин если был пустой");
 
         user.setBirthday(LocalDate.of(2050, 2, 3));
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user.getId(), user));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user));
         //Выбросить исключение если пользователь ввёл не коректную дату
     }
 
@@ -176,11 +183,11 @@ class FilmorateApplicationTests {
     void successfullyUpdatingTheUser() {
         User user = new User(1, "sad@a.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
 
-        userController.create(user.getId(), user);
+        userController.create(user);
 
         User user2 = new User(1, "sad@a.ru", "sw2", "qwerty", LocalDate.of(2002, 2, 3));
 
-        User updateUser = userController.update(1, user2);
+        User updateUser = userController.updateUser(user2);
 
         assertEquals(user2, user, "Успешно обновляем пользователя");
     }
@@ -190,23 +197,23 @@ class FilmorateApplicationTests {
         User user = new User(1, "norm@s.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
         User userNewEmail = new User(1, "", "sw2", "qwer", LocalDate.of(2002, 2, 3));
 
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.update(user.getId(), userNewEmail));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(userNewEmail));
         //Выбросить исключение по причине пустого email
 
         User userNewEmail2 = new User(1, "rererere", "sw2", "qwer", LocalDate.of(2002, 2, 3));
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.update(user.getId(), userNewEmail2));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(userNewEmail2));
         //Выбросить исключения про причине отсутствие  @
 
         User usernameWithASpace = new User(1, "norm@poc.ru", "sw 2", "qwer", LocalDate.of(2002, 2, 3));
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.update(user.getId(), usernameWithASpace));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(usernameWithASpace));
         // Исключение Пользователь поставил пробел в логине
 
         User userNoLogin = new User(1, "norm@poc.ru", "", "qwer", LocalDate.of(2002, 2, 3));
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.update(user.getId(), userNoLogin));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(userNoLogin));
         // Исключение Пользователь оставил пустое поле логина
 
         User userBirthdaysAreComing = new User(1, "norm@poc.ru", "sweg", "qwer", LocalDate.of(2050, 2, 3));
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.update(user.getId(), user));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(user));
         //Выбросить исключение если пользователь ввёл не коректную дату
     }
 
@@ -215,8 +222,8 @@ class FilmorateApplicationTests {
         User user = new User(1, "norm@s.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
         User user2 = new User(2, "bigNorm@s.ru", "sw222s", "qwereasdaw", LocalDate.of(2001, 2, 3));
 
-        User createUser = userController.create(1,user);
-        User createUser2 = userController.create(2,user2);
+        User createUser = userController.create(user);
+        User createUser2 = userController.create(user2);
 
         Collection<User> allUsers = userController.userAll();
 
