@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +37,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Успешно создаем фильм")
     void successfulFilmСreation() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
 
@@ -44,6 +46,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Выбрасивыем исключение по причине отсутствия названия")
     void throwExceptionsIfTheNameIsMissing() {
         Film film = new Film(1, "", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> filmController.create(film));
@@ -51,6 +54,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Выбросить исключения по причине  множества сиволов в описание")
     void throwExceptionsDueToTheNumberOfSiwolsInTheDescription() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         String longString = new String(new char[201]).replace('\0', 'X');
@@ -62,6 +66,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Выбросить исключения по причине некорректной даты")
     void throwExceptionsDueToIncorrectDate() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(1000, 3, 24), 60);
 
@@ -70,6 +75,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Выбросить исключения потому что отрицательное  число в продолжительности")
     void throwExceptionsBecauseThereIsANegativeNumberInTheDuration() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(1000, 3, 24), -2);
 
@@ -78,6 +84,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Успешно обновляем фильм фильм")
     void successfullyUpdatingTheMovieMovie() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film newFilm = new Film(1, "Другое название", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
@@ -87,6 +94,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Выбросить исключения при обновление по причине отсутствия названия")
     void throwExceptionsWhenUpdatingDueToMissingName() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film createFilm = filmController.create(film);
@@ -96,6 +104,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Выбросить исключения при обновление по причине  множества сиволов в описание")
     void throwExceptionsWhenUpdatingDueToTheNumberOfSiwolsInTheDescription() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film createFilm = filmController.create(film);
@@ -108,6 +117,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Выбросить исключения при обновление по причине некорректной даты")
     void throwExceptionsWhenUpdatingDueToIncorrectDate() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film createFilm = filmController.create(film);
@@ -117,6 +127,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Выбросить исключения при обновление по причине отрицательного числа")
     void throwExceptionsWhenUpdatingBecauseOfANegativeNumber() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film createFilm = filmController.create(film);
@@ -126,6 +137,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Успешно получаем все фильмы")
     void successGetAllFilm() {
         Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
         Film film2 = new Film(2, "Другое название", "Другое описание фильма", LocalDate.of(2020, 1, 1), 70);
@@ -143,6 +155,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Успешно создаем пользователя")
     void successUserСreation() {
         User user = new User(1, "sad@a.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
 
@@ -151,6 +164,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Тесты на валидацию пользователя")
     void verifyingTheValidationOfUserCreation() {
         User user = new User(1, "", "sw2", "qwer", LocalDate.of(2002, 2, 3));
         assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.create(user));
@@ -180,6 +194,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Успешно обновляем пользователя")
     void successfullyUpdatingTheUser() {
         User user = new User(1, "sad@a.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
 
@@ -193,6 +208,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Тесты на валидацию при обновления данных пользователя")
     void verifyingTheValidationOfUserUpdate() {
         User user = new User(1, "norm@s.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
         User userNewEmail = new User(1, "", "sw2", "qwer", LocalDate.of(2002, 2, 3));
@@ -218,6 +234,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    @DisplayName("Успешно получаем пользователей")
     void successGetAllUsers() {
         User user = new User(1, "norm@s.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
         User user2 = new User(2, "bigNorm@s.ru", "sw222s", "qwereasdaw", LocalDate.of(2001, 2, 3));
