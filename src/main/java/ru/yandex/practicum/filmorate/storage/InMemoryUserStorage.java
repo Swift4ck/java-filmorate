@@ -36,7 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(@RequestBody User updateUser) {
         if (!users.containsKey(updateUser.getId())) {
             log.debug("Введен не существующий id");
-            throw new NotFoundException("Пользователь по id не найден");
+            throw new ValidationException("Пользователь по id не найден");
         }
 
         User user = users.get(updateUser.getId());
