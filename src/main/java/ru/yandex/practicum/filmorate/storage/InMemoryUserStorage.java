@@ -49,6 +49,8 @@ public class InMemoryUserStorage implements UserStorage {
             user.setBirthday(updateUser.getBirthday());
 
             log.info("Пользователь обновил данные");
+        }else {
+            throw new ValidationException("Данные пользователя не прошли валидацию");
         }
         return user;
     }
