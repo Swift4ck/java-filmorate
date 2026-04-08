@@ -38,10 +38,12 @@ public class InMemoryUserStorage implements UserStorage {
             log.debug("Введён несуществующий id");
             throw new NotFoundException("Пользователь по id не найден");
         }
-        
+
         if (!checkValidationUser(updateUser)) {
             throw new ValidationException("Данные пользователя не прошли валидацию");
         }
+
+        
         User user = users.get(updateUser.getId());
 
         user.setEmail(updateUser.getEmail());
