@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
@@ -95,7 +94,7 @@ public class FilmController implements FilmStorage {
 
 
     @DeleteMapping("/films/{filmsId}/like/{id}")
-    public boolean removeLikeFilm(@PathVariable long filmsId, @PathVariable long id){
+    public boolean removeLikeFilm(@PathVariable long filmsId, @PathVariable long id) {
         if (filmStorage.getFilms().get(filmsId) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
@@ -106,7 +105,7 @@ public class FilmController implements FilmStorage {
     }
 
     @GetMapping("/films/popular")
-    public List<Film> topFilm(@RequestParam(value = "count", defaultValue = "10") int count){
+    public List<Film> topFilm(@RequestParam(value = "count", defaultValue = "10") int count) {
         return filmService.getTopFilms(count);
     }
 

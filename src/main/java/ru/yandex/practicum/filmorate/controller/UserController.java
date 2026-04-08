@@ -125,12 +125,10 @@ public class UserController implements UserStorage {
         if (user == null || otherUser == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
-        return userService.commonFriends(user,otherUser).stream()
+        return userService.commonFriends(user, otherUser).stream()
                 .map(friendId -> userStorage.getUsers().get(friendId))
                 .toList();
     }
-
-
 
 
 }
