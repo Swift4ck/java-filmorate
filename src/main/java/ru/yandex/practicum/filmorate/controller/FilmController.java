@@ -40,7 +40,7 @@ public class FilmController implements FilmStorage {
     @Override
     @PutMapping("/films")
     public Film update(@RequestBody Film updatedFilm) {
-        if (updatedFilm == null ) {
+        if (updatedFilm == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
         return filmStorage.update(updatedFilm);
