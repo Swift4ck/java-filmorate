@@ -34,16 +34,16 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(@RequestBody User updateUser) {
-        if (!checkValidationUser(updateUser)) {
-            throw new ValidationException("Данные пользователя не прошли валидацию");
-        }
-
         if (!users.containsKey(updateUser.getId())) {
             log.debug("Введён несуществующий id");
             throw new NotFoundException("Пользователь по id не найден");
         }
-
+        
+        if (!checkValidationUser(updateUser)) {
+            throw new ValidationException("Данные пользователя не прошли валидацию");
+        }
         User user = users.get(updateUser.getId());
+
         user.setEmail(updateUser.getEmail());
         user.setLogin(updateUser.getLogin());
         user.setName(updateUser.getName());
