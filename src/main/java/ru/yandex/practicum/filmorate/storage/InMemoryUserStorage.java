@@ -34,26 +34,26 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(@RequestBody User updateUser) {
+        if (!checkValidationUser(updateUser)) {
+            throw new ValidationException("Данные пользователя не прошли валидацию");
+        }
+
         if (!users.containsKey(updateUser.getId())) {
-            log.debug("Введен не существующий id");
+            log.debug("Введён несуществующий id");
             throw new NotFoundException("Пользователь по id не найден");
         }
 
         User user = users.get(updateUser.getId());
 
-        if (checkValidationUser(updateUser)) {
+        user.setEmail(updateUser.getEmail());
+        user.setLogin(updateUser.getLogin());
+        user.setName(updateUser.getName());
+        user.setBirthday(updateUser.getBirthday());
 
-            user.setEmail(updateUser.getEmail());
-            user.setLogin(updateUser.getLogin());
-            user.setName(updateUser.getName());
-            user.setBirthday(updateUser.getBirthday());
-
-            log.info("Пользователь обновил данные");
-        } else {
-            throw new ValidationException("Данные пользователя не прошли валидацию");
-        }
+        log.info("Пользователь обновил данные");
         return user;
     }
+
 
     @Override
     public Collection<User> userAll() {
