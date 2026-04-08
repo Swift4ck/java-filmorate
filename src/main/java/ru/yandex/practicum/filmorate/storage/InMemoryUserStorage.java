@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -35,7 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(@RequestBody User updateUser) {
         if (!users.containsKey(updateUser.getId())) {
             log.debug("Введен не существующий id");
-            throw new ValidationException("Пользователь по id не найден");
+            throw new NotFoundException("Пользователь по id не найден");
         }
 
         User user = users.get(updateUser.getId());
