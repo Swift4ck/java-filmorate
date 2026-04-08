@@ -1,59 +1,64 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
 @RestController
-public class FilmController {
+public class FilmController implements FilmStorage {
 
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int nexId = 1;
+    public InMemoryFilmStorage filmStorage;
+    public FilmService filmService;
+    public InMemoryUserStorage memoryUserStorage;
 
+
+    @Autowired
+    public FilmController(InMemoryFilmStorage filmStorage, FilmService filmService, InMemoryUserStorage memoryUserStorage) {
+        this.filmStorage = filmStorage;
+        this.filmService = filmService;
+        this.memoryUserStorage = memoryUserStorage;
+    }
+
+    @Override
     @PostMapping("/films")
     public Film create(@RequestBody Film film) {
-        if (checkValidationFilm(film)) {
-            film.setId(nexId++);
-            log.info("Добавлен фильм: " + film);
-            films.put(film.getId(), film);
-        }
-        return film;
+        return filmStorage.create(film);
     }
 
+    @Override
     @PutMapping("/films")
     public Film update(@RequestBody Film updatedFilm) {
-        if (!films.containsKey(updatedFilm.getId())) {
-            log.debug("Введен не существующий id");
-            throw new ValidationException("Фильм с таким ID не найден.");
+        if (updatedFilm == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
-        Film film = films.get(updatedFilm.getId());
-
-        if (checkValidationFilm(updatedFilm)) {
-
-            film.setName(updatedFilm.getName());
-            film.setDescription(updatedFilm.getDescription());
-            film.setReleaseDate(updatedFilm.getReleaseDate());
-            film.setDuration(updatedFilm.getDuration());
-            log.info("Обновлена информацию по фильму: " + film);
-        }
-        return film;
+        return filmStorage.update(updatedFilm);
     }
 
+    @Override
     @GetMapping("/films")
     public List<Film> filmAll() {
-        return new ArrayList<>(films.values());
+        return filmStorage.filmAll();
     }
 
+    @Override
     public void clearFilm() {
-        films.clear();
-        nexId = 1;
+        filmStorage.clearFilm();
     }
 
+    @Override
     public boolean checkValidationFilm(Film film) {
         if (film.getName().isEmpty()) {
             log.debug("Пустое названия фильма");
@@ -77,5 +82,32 @@ public class FilmController {
         return true;
     }
 
+    @PutMapping("/films/{filmsId}/like/{id}")
+    public boolean addLike(@PathVariable long filmsId, @PathVariable long id) {
+        if (filmStorage.getFilms().get(filmsId) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+        }
+        if (memoryUserStorage.getUsers().get(id) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+        }
+        return filmService.addLike(filmsId, id);
+    }
+
+
+    @DeleteMapping("/films/{filmsId}/like/{id}")
+    public boolean removeLikeFilm(@PathVariable long filmsId, @PathVariable long id){
+        if (filmStorage.getFilms().get(filmsId) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+        }
+        if (memoryUserStorage.getUsers().get(id) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+        }
+        return filmService.removeLike(filmsId, id);
+    }
+
+    @GetMapping("/films/popular")
+    public List<Film> topFilm(@RequestParam(value = "count", defaultValue = "10") int count){
+        return filmService.getTopFilms(count);
+    }
 
 }
