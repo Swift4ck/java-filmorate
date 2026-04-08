@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -41,7 +42,7 @@ public class FilmController implements FilmStorage {
     @PutMapping("/films")
     public Film update(@RequestBody Film updatedFilm) {
         if (updatedFilm == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
         return filmStorage.update(updatedFilm);
     }
@@ -84,10 +85,10 @@ public class FilmController implements FilmStorage {
     @PutMapping("/films/{filmsId}/like/{id}")
     public boolean addLike(@PathVariable long filmsId, @PathVariable long id) {
         if (filmStorage.getFilms().get(filmsId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
         if (memoryUserStorage.getUsers().get(id) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         return filmService.addLike(filmsId, id);
     }
@@ -96,10 +97,10 @@ public class FilmController implements FilmStorage {
     @DeleteMapping("/films/{filmsId}/like/{id}")
     public boolean removeLikeFilm(@PathVariable long filmsId, @PathVariable long id) {
         if (filmStorage.getFilms().get(filmsId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
         if (memoryUserStorage.getUsers().get(id) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         return filmService.removeLike(filmsId, id);
     }

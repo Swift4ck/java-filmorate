@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -82,7 +83,7 @@ public class UserController implements UserStorage {
         User user = userStorage.getUsers().get(id);
 
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
 
         return user.getFriendsList().stream()
@@ -96,7 +97,7 @@ public class UserController implements UserStorage {
         User friend = userStorage.getUsers().get(friendId);
 
         if (user == null || friend == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
 
         userService.addFriends(user, friend);
@@ -109,7 +110,7 @@ public class UserController implements UserStorage {
         User deleteUser = userStorage.getUsers().get(friendId);
 
         if (user == null || deleteUser == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
 
         userService.deleteFriends(user, deleteUser);
@@ -123,7 +124,7 @@ public class UserController implements UserStorage {
         User otherUser = userStorage.getUsers().get(otherId);
 
         if (user == null || otherUser == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         return userService.commonFriends(user, otherUser).stream()
                 .map(friendId -> userStorage.getUsers().get(friendId))

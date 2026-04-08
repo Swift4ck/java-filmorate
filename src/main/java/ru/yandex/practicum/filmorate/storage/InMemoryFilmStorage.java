@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -39,7 +40,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film update(@RequestBody Film updatedFilm) {
         if (!films.containsKey(updatedFilm.getId())) {
             log.debug("Введен не существующий id");
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм по id не найден");
+            throw new NotFoundException("Фильм по id не найден");
         }
         Film film = films.get(updatedFilm.getId());
 
