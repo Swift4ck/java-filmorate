@@ -42,7 +42,6 @@ public class InMemoryUserStorage implements UserStorage {
         if (!checkValidationUser(updateUser)) {
             throw new ValidationException("Данные пользователя не прошли валидацию");
         }
-
         
         User user = users.get(updateUser.getId());
 
