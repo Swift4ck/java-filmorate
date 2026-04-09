@@ -65,6 +65,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Map<Long, Film> getFilms() {
+        return films;
+    }
+
+    @Override
     public boolean checkValidationFilm(Film film) {
         if (film.getName().isEmpty()) {
             log.debug("Пустое названия фильма");
@@ -88,5 +93,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         return true;
     }
 
+    @Override
+    public Film getFilmById(long id){
+        return films.get(id);
+    }
 
 }

@@ -10,33 +10,34 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
 @RestController
-public class FilmController implements FilmStorage {
+public class FilmController {
 
-    public InMemoryFilmStorage filmStorage;
-    public FilmService filmService;
-    public InMemoryUserStorage memoryUserStorage;
+    private final FilmStorage filmStorage;
+    private final FilmService filmService;
+    private final UserStorage memoryUserStorage;
 
 
     @Autowired
-    public FilmController(InMemoryFilmStorage filmStorage, FilmService filmService, InMemoryUserStorage memoryUserStorage) {
+    public FilmController(FilmStorage filmStorage, FilmService filmService, UserStorage memoryUserStorage) {
         this.filmStorage = filmStorage;
         this.filmService = filmService;
         this.memoryUserStorage = memoryUserStorage;
     }
 
-    @Override
+
     @PostMapping("/films")
     public Film create(@RequestBody Film film) {
         return filmStorage.create(film);
     }
 
-    @Override
+
     @PutMapping("/films")
     public Film update(@RequestBody Film updatedFilm) {
         if (updatedFilm == null) {
@@ -45,18 +46,19 @@ public class FilmController implements FilmStorage {
         return filmStorage.update(updatedFilm);
     }
 
-    @Override
+
     @GetMapping("/films")
     public List<Film> filmAll() {
         return filmStorage.filmAll();
     }
 
-    @Override
+
     public void clearFilm() {
         filmStorage.clearFilm();
     }
 
-    @Override
+
+
     public boolean checkValidationFilm(Film film) {
         if (film.getName().isEmpty()) {
             log.debug("Пустое названия фильма");
@@ -78,6 +80,11 @@ public class FilmController implements FilmStorage {
             throw new ValidationException("продолжительность фильма должна быть положительным числом.");
         }
         return true;
+    }
+
+
+    public Map<Long, Film> getFilms(){
+        return filmStorage.getFilms();
     }
 
     @PutMapping("/films/{filmsId}/like/{id}")
@@ -107,5 +114,11 @@ public class FilmController implements FilmStorage {
     public List<Film> topFilm(@RequestParam(value = "count", defaultValue = "10") int count) {
         return filmService.getTopFilms(count);
     }
+
+    @GetMapping("users/{id}")
+    public Film getFilmById(@PathVariable long id){
+        return filmStorage.getFilmById(id);
+    }
+
 
 }

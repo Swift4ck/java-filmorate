@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 
 import java.util.List;
+import java.util.Map;
 
 
 public interface FilmStorage {
@@ -17,5 +18,11 @@ public interface FilmStorage {
     void clearFilm();
 
     boolean checkValidationFilm(Film film);
+
+    Map<Long, Film> getFilms();
+
+    Film getFilmById(long id);
+
+
 }
 

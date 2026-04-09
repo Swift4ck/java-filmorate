@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,10 +17,10 @@ import java.util.Set;
 public class UserService {
 
 
-    private final InMemoryUserStorage memoryUserStorage;
+    private final UserStorage memoryUserStorage;
 
     @Autowired
-    public UserService(InMemoryUserStorage memoryUserStorage) {
+    public UserService(UserStorage memoryUserStorage) {
         this.memoryUserStorage = memoryUserStorage;
     }
 
@@ -31,8 +32,7 @@ public class UserService {
         user.getFriendsList().add(addUser.getId());
         addUser.getFriendsList().add(user.getId());
 
-        memoryUserStorage.refreshMap(user);
-        memoryUserStorage.refreshMap(addUser);
+
         return user;
     }
 

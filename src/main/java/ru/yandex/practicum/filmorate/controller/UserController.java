@@ -15,44 +15,42 @@ import java.util.*;
 
 @Slf4j
 @RestController
-public class UserController implements UserStorage {
+public class UserController {
 
-    public InMemoryUserStorage userStorage;
+    public UserStorage userStorage;
     public UserService userService;
 
     @Autowired
-    public UserController(InMemoryUserStorage userStorage, UserService userService) {
+    public UserController(UserStorage userStorage, UserService userService) {
         this.userStorage = userStorage;
         this.userService = userService;
     }
 
-    @Override
     @PostMapping("/users")
     public User create(@RequestBody User user) {
         user = userStorage.create(user);
         return user;
     }
 
-    @Override
     @PutMapping("/users")
     public User updateUser(@RequestBody User updateUser) {
         updateUser = userStorage.updateUser(updateUser);
         return updateUser;
     }
 
-    @Override
     @GetMapping("/users")
     public Collection<User> userAll() {
         return userStorage.userAll();
     }
 
-    @Override
     public void clearUser() {
         userStorage.clearUser();
     }
 
+    public  Map<Long, User> getUsers(){
+        return userStorage.getUsers();
+    }
 
-    @Override
     public boolean checkValidationUser(User user) {
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
             log.debug("Пользователь не ввел почту или email без @");
