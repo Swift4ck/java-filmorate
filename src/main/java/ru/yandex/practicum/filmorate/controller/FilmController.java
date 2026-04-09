@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
@@ -58,7 +56,6 @@ public class FilmController {
     }
 
 
-
     public boolean checkValidationFilm(Film film) {
         if (film.getName().isEmpty()) {
             log.debug("Пустое названия фильма");
@@ -83,7 +80,7 @@ public class FilmController {
     }
 
 
-    public Map<Long, Film> getFilms(){
+    public Map<Long, Film> getFilms() {
         return filmStorage.getFilms();
     }
 
@@ -116,7 +113,7 @@ public class FilmController {
     }
 
     @GetMapping("users/{id}")
-    public Film getFilmById(@PathVariable long id){
+    public Film getFilmById(@PathVariable long id) {
         return filmStorage.getFilmById(id);
     }
 
