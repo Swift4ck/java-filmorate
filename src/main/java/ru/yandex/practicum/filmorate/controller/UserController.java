@@ -1,9 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -12,50 +16,39 @@ import java.util.*;
 @RestController
 public class UserController {
 
-    private final Map<Integer, User> users = new HashMap<>();
-    private int nexId = 1;
+    public UserStorage userStorage;
+    public UserService userService;
+
+    @Autowired
+    public UserController(UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
+    }
 
     @PostMapping("/users")
     public User create(@RequestBody User user) {
-        if (checkValidationUser(user)) {
-            user.setId(nexId++);
-            log.info("Пользователь создан; " + user);
-            users.put(user.getId(), user);
-        }
+        user = userStorage.create(user);
         return user;
     }
 
     @PutMapping("/users")
     public User updateUser(@RequestBody User updateUser) {
-        if (!users.containsKey(updateUser.getId())) {
-            log.debug("Введен не существующий id");
-            throw new ValidationException("Пользователь с таким ID не найден.");
-        }
-
-        User user = users.get(updateUser.getId());
-
-        if (checkValidationUser(updateUser)) {
-
-            user.setEmail(updateUser.getEmail());
-            user.setLogin(updateUser.getLogin());
-            user.setName(updateUser.getName());
-            user.setBirthday(updateUser.getBirthday());
-
-            log.info("Пользователь обновил данные");
-        }
-        return user;
+        updateUser = userStorage.updateUser(updateUser);
+        return updateUser;
     }
 
     @GetMapping("/users")
     public Collection<User> userAll() {
-        return users.values();
+        return userStorage.userAll();
     }
 
     public void clearUser() {
-        users.clear();
-        nexId = 1;
+        userStorage.clearUser();
     }
 
+    public Map<Long, User> getUsers() {
+        return userStorage.getUsers();
+    }
 
     public boolean checkValidationUser(User user) {
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
@@ -79,5 +72,59 @@ public class UserController {
         }
         return true;
     }
+
+    @GetMapping("/users/{id}/friends")
+    public List<User> getFriends(@PathVariable long id) {
+        User user = userStorage.getUsers().get(id);
+
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        return user.getFriendsList().stream()
+                .map(friendId -> userStorage.getUsers().get(friendId))
+                .toList();
+    }
+
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable long id, @PathVariable long friendId) {
+        User user = userStorage.getUsers().get(id);
+        User friend = userStorage.getUsers().get(friendId);
+
+        if (user == null || friend == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        userService.addFriends(user, friend);
+        return user;
+    }
+
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public User deleteUser(@PathVariable long id, @PathVariable long friendId) {
+        User user = userStorage.getUsers().get(id);
+        User deleteUser = userStorage.getUsers().get(friendId);
+
+        if (user == null || deleteUser == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        userService.deleteFriends(user, deleteUser);
+        return user;
+    }
+
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> commonFriends(@PathVariable long id, @PathVariable long otherId) {
+        User user = userStorage.getUsers().get(id);
+        User otherUser = userStorage.getUsers().get(otherId);
+
+        if (user == null || otherUser == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        return userService.commonFriends(user, otherUser).stream()
+                .map(friendId -> userStorage.getUsers().get(friendId))
+                .toList();
+    }
+
 
 }

@@ -1,9 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -12,47 +17,44 @@ import java.util.*;
 @RestController
 public class FilmController {
 
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int nexId = 1;
+    private final FilmStorage filmStorage;
+    private final FilmService filmService;
+    private final UserStorage memoryUserStorage;
+
+
+    @Autowired
+    public FilmController(FilmStorage filmStorage, FilmService filmService, UserStorage memoryUserStorage) {
+        this.filmStorage = filmStorage;
+        this.filmService = filmService;
+        this.memoryUserStorage = memoryUserStorage;
+    }
+
 
     @PostMapping("/films")
     public Film create(@RequestBody Film film) {
-        if (checkValidationFilm(film)) {
-            film.setId(nexId++);
-            log.info("Добавлен фильм: " + film);
-            films.put(film.getId(), film);
-        }
-        return film;
+        return filmStorage.create(film);
     }
+
 
     @PutMapping("/films")
     public Film update(@RequestBody Film updatedFilm) {
-        if (!films.containsKey(updatedFilm.getId())) {
-            log.debug("Введен не существующий id");
-            throw new ValidationException("Фильм с таким ID не найден.");
+        if (updatedFilm == null) {
+            throw new NotFoundException("Фильм не найден");
         }
-        Film film = films.get(updatedFilm.getId());
-
-        if (checkValidationFilm(updatedFilm)) {
-
-            film.setName(updatedFilm.getName());
-            film.setDescription(updatedFilm.getDescription());
-            film.setReleaseDate(updatedFilm.getReleaseDate());
-            film.setDuration(updatedFilm.getDuration());
-            log.info("Обновлена информацию по фильму: " + film);
-        }
-        return film;
+        return filmStorage.update(updatedFilm);
     }
+
 
     @GetMapping("/films")
     public List<Film> filmAll() {
-        return new ArrayList<>(films.values());
+        return filmStorage.filmAll();
     }
 
+
     public void clearFilm() {
-        films.clear();
-        nexId = 1;
+        filmStorage.clearFilm();
     }
+
 
     public boolean checkValidationFilm(Film film) {
         if (film.getName().isEmpty()) {
@@ -75,6 +77,44 @@ public class FilmController {
             throw new ValidationException("продолжительность фильма должна быть положительным числом.");
         }
         return true;
+    }
+
+
+    public Map<Long, Film> getFilms() {
+        return filmStorage.getFilms();
+    }
+
+    @PutMapping("/films/{filmsId}/like/{id}")
+    public boolean addLike(@PathVariable long filmsId, @PathVariable long id) {
+        if (filmStorage.getFilms().get(filmsId) == null) {
+            throw new NotFoundException("Фильм не найден");
+        }
+        if (memoryUserStorage.getUsers().get(id) == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        return filmService.addLike(filmsId, id);
+    }
+
+
+    @DeleteMapping("/films/{filmsId}/like/{id}")
+    public boolean removeLikeFilm(@PathVariable long filmsId, @PathVariable long id) {
+        if (filmStorage.getFilms().get(filmsId) == null) {
+            throw new NotFoundException("Фильм не найден");
+        }
+        if (memoryUserStorage.getUsers().get(id) == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        return filmService.removeLike(filmsId, id);
+    }
+
+    @GetMapping("/films/popular")
+    public List<Film> topFilm(@RequestParam(value = "count", defaultValue = "10") int count) {
+        return filmService.getTopFilms(count);
+    }
+
+    @GetMapping("users/{id}")
+    public Film getFilmById(@PathVariable long id) {
+        return filmStorage.getFilmById(id);
     }
 
 

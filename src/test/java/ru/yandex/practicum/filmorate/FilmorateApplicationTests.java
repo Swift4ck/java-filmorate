@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,6 +29,9 @@ class FilmorateApplicationTests {
 
     @Autowired
     private UserController userController;
+
+    @Autowired
+    private InMemoryUserStorage inMemoryUserStorage;
 
 
     @AfterEach
@@ -211,10 +215,12 @@ class FilmorateApplicationTests {
     @DisplayName("Тесты на валидацию при обновления данных пользователя")
     void verifyingTheValidationOfUserUpdate() {
         User user = new User(1, "norm@s.ru", "sw2", "qwer", LocalDate.of(2002, 2, 3));
+        inMemoryUserStorage.create(user);
         User userNewEmail = new User(1, "", "sw2", "qwer", LocalDate.of(2002, 2, 3));
 
         assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(userNewEmail));
         //Выбросить исключение по причине пустого email
+
 
         User userNewEmail2 = new User(1, "rererere", "sw2", "qwer", LocalDate.of(2002, 2, 3));
         assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(userNewEmail2));
@@ -229,7 +235,7 @@ class FilmorateApplicationTests {
         // Исключение Пользователь оставил пустое поле логина
 
         User userBirthdaysAreComing = new User(1, "norm@poc.ru", "sweg", "qwer", LocalDate.of(2050, 2, 3));
-        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(user));
+        assertThrows(ru.yandex.practicum.filmorate.exception.ValidationException.class, () -> userController.updateUser(userBirthdaysAreComing));
         //Выбросить исключение если пользователь ввёл не коректную дату
     }
 
