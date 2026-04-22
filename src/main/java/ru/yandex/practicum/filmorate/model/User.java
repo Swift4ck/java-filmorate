@@ -13,7 +13,7 @@ public class User {
     private String login;
     private String name;
     private LocalDate birthday;
-    private Set<Long> friendsList = new HashSet<>();
+    private Set<Friendship> friendsList = new HashSet<>();
 
     public User(long id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
