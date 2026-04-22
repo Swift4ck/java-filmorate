@@ -13,5 +13,6 @@ public class Friendship {
     private long user_id;
     private long friends_id;
     private FriendshipStatus friendshipStatus;
-    private LocalDateTime createdAt;
+    private LocalDateTime friendTime;
+
 }
