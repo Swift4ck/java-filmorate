@@ -5,9 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Friendship;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,9 +32,14 @@ public class UserService {
             log.debug("Пользователь уже добавлен в друзья");
         }
 
-        user.getFriendsList().add(addUser.getId());
-        addUser.getFriendsList().add(user.getId());
+        if (user.getId() == addUser.getId()) {
+            log.debug("Нельзя добавть себя в друзья");
+        }
 
+        user.getFriendsList().add(new Friendship(user.getId(), addUser.getId(),
+                FriendshipStatus.CONFIRMED, LocalDateTime.now()));
+        addUser.getFriendsList().add(new Friendship(addUser.getId(), user.getId(),
+                FriendshipStatus.CONFIRMED, LocalDateTime.now()));
 
         return user;
     }
@@ -47,19 +56,19 @@ public class UserService {
         return true;
     }
 
-    public Set<Long> commonFriends(User user1, User user2) {
+    public Set<Friendship> commonFriends(User user1, User user2) {
 
-        Set<Long> friendsList1 = user1.getFriendsList();
-        Set<Long> friendsList2 = user2.getFriendsList();
+        Set<Friendship> friendsList1 = user1.getFriendsList();
+        Set<Friendship> friendsList2 = user2.getFriendsList();
 
-        Set<Long> commonFriends = new HashSet<>(friendsList1);
+        Set<Friendship> commonFriends = new HashSet<>(friendsList1);
 
         commonFriends.retainAll(friendsList2);
 
         return commonFriends;
     }
 
-    public Set<Long> allFriends(long userId) {
+    public Set<Friendship> allFriends(long userId) {
         User user = memoryUserStorage.getUsers().get(userId);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
