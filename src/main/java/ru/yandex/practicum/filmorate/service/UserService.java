@@ -2,13 +2,15 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Friendship;
-import ru.yandex.practicum.filmorate.model.FriendshipStatus;
+import ru.yandex.practicum.filmorate.enums.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,7 +25,7 @@ public class UserService {
     private final UserStorage memoryUserStorage;
 
     @Autowired
-    public UserService(UserStorage memoryUserStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage memoryUserStorage) {
         this.memoryUserStorage = memoryUserStorage;
     }
 
@@ -74,6 +76,29 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         return user.getFriendsList();
+    }
+
+    public boolean checkValidationUser(User user) {
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            log.debug("Пользователь не ввел почту или email без @");
+            throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
+        }
+
+        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+            log.debug("Пользователь не ввел логин или поставил пробел");
+            throw new ValidationException("логин не может быть пустым и содержать пробелы;");
+        }
+
+        if (user.getName() == null || user.getName().isEmpty()) {
+            log.debug("Пользователь не ввел ник, ник теперь такой же как и логин");
+            user.setName(user.getLogin());
+        }
+
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.debug("Пользователь ввел не коректную дату");
+            throw new ValidationException("дата рождения не может быть в будущем.");
+        }
+        return true;
     }
 
 }

@@ -2,13 +2,14 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -23,7 +24,9 @@ public class FilmController {
 
 
     @Autowired
-    public FilmController(FilmStorage filmStorage, FilmService filmService, UserStorage memoryUserStorage) {
+    public FilmController(@Qualifier("FilmDbStorage") FilmStorage filmStorage, FilmService filmService,
+                          @Qualifier("UserDbStorage") UserStorage memoryUserStorage) {
+
         this.filmStorage = filmStorage;
         this.filmService = filmService;
         this.memoryUserStorage = memoryUserStorage;
@@ -32,6 +35,7 @@ public class FilmController {
 
     @PostMapping("/films")
     public Film create(@RequestBody Film film) {
+        filmStorage.checkValidationFilm(film);
         return filmStorage.create(film);
     }
 

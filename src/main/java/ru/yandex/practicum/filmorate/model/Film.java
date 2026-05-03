@@ -18,8 +18,8 @@ public class Film {
     private LocalDate releaseDate;
     private int duration; //продолжительность
     private Set<Long> likes = new HashSet<>();
-    private List<FilmGenre> genres;
-    private FilmRating filmRating;
+    private Set<Genre> genres = new HashSet<>(); //жанры
+    private FilmRating mpa; //возрастной рейтинг
 
     public Film(long id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;
@@ -28,4 +28,9 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
     }
+
+    public Film() {
+
+    }
+
 }
