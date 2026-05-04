@@ -257,4 +257,6 @@ class FilmorateApplicationTests {
         assertEquals(checkFilm, allFilmList, "Успешно получаем юзеров");
     }
 
+
+
 }

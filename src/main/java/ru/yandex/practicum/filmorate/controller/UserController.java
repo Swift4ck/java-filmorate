@@ -2,12 +2,13 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -27,6 +28,7 @@ public class UserController {
 
     @PostMapping("/users")
     public User create(@RequestBody User user) {
+        userService.checkValidationUser(user);
         user = userStorage.create(user);
         return user;
     }
@@ -73,18 +75,18 @@ public class UserController {
         return true;
     }
 
-    @GetMapping("/users/{id}/friends")
-    public List<User> getFriends(@PathVariable long id) {
-        User user = userStorage.getUsers().get(id);
-
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        return user.getFriendsList().stream()
-                .map(friendId -> userStorage.getUsers().get(friendId))
-                .toList();
-    }
+//    @GetMapping("/users/{id}/friends")
+//    public List<User> getFriends(@PathVariable long id) {
+//        User user = userStorage.getUsers().get(id);
+//
+//        if (user == null) {
+//            throw new NotFoundException("Пользователь не найден");
+//        }
+//
+//        return user.getFriendsList().stream()
+//                .map(friendId -> userStorage.getUsers().get(friendId))
+//                .toList();
+//    }
 
     @PutMapping("/users/{id}/friends/{friendId}")
     public User addFriend(@PathVariable long id, @PathVariable long friendId) {

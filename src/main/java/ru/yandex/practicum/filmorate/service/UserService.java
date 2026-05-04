@@ -2,13 +2,19 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.enums.FriendshipStatus;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -24,33 +30,33 @@ public class UserService {
     }
 
     public User addFriends(User user, User addUser) {
-        if (user.getFriendsList().contains(addUser.getId())) {
+        if (user.getFriendsList().containsKey(addUser.getId())) {
             log.debug("Пользователь уже добавлен в друзья");
         }
 
-        user.getFriendsList().add(addUser.getId());
-        addUser.getFriendsList().add(user.getId());
+        if (user.getId() == addUser.getId()) {
+            log.debug("Нельзя добавть себя в друзья");
+        }
 
+        user.getFriendsList().put(addUser.getId() , FriendshipStatus.CONFIRMED);
 
         return user;
     }
 
     public boolean deleteFriends(User user, User deleteUser) {
-        if (!user.getFriendsList().contains(deleteUser.getId())) {
+        if (!user.getFriendsList().containsKey(deleteUser.getId())) {
             log.debug("Пользователя нет в друзьях");
             return false;
         }
         user.getFriendsList().remove(deleteUser.getId());
-        deleteUser.getFriendsList().remove(user.getId());
-
 
         return true;
     }
 
     public Set<Long> commonFriends(User user1, User user2) {
 
-        Set<Long> friendsList1 = user1.getFriendsList();
-        Set<Long> friendsList2 = user2.getFriendsList();
+        Set<Long> friendsList1 = user1.getFriendsList().keySet();
+        Set<Long> friendsList2 = user2.getFriendsList().keySet();
 
         Set<Long> commonFriends = new HashSet<>(friendsList1);
 
@@ -59,12 +65,35 @@ public class UserService {
         return commonFriends;
     }
 
-    public Set<Long> allFriends(long userId) {
+    public Map<Long ,FriendshipStatus> allFriends(long userId) {
         User user = memoryUserStorage.getUsers().get(userId);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         return user.getFriendsList();
+    }
+
+    public boolean checkValidationUser(User user) {
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            log.debug("Пользователь не ввел почту или email без @");
+            throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
+        }
+
+        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+            log.debug("Пользователь не ввел логин или поставил пробел");
+            throw new ValidationException("логин не может быть пустым и содержать пробелы;");
+        }
+
+        if (user.getName() == null || user.getName().isEmpty()) {
+            log.debug("Пользователь не ввел ник, ник теперь такой же как и логин");
+            user.setName(user.getLogin());
+        }
+
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.debug("Пользователь ввел не коректную дату");
+            throw new ValidationException("дата рождения не может быть в будущем.");
+        }
+        return true;
     }
 
 }
