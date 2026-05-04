@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 
 import lombok.Data;
+import ru.yandex.practicum.filmorate.enums.MpaRating;
 
 
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ public class Film {
     private int duration; //продолжительность
     private Set<Long> likes = new HashSet<>();
     private Set<Genre> genres = new HashSet<>(); //жанры
-    private FilmRating mpa; //возрастной рейтинг
+    private MpaRating mpa; //возрастной рейтинг
 
     public Film(long id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;

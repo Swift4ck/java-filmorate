@@ -24,8 +24,8 @@ public class FilmController {
 
 
     @Autowired
-    public FilmController(@Qualifier("FilmDbStorage") FilmStorage filmStorage, FilmService filmService,
-                          @Qualifier("UserDbStorage") UserStorage memoryUserStorage) {
+    public FilmController(FilmStorage filmStorage, FilmService filmService,
+                          UserStorage memoryUserStorage) {
 
         this.filmStorage = filmStorage;
         this.filmService = filmService;

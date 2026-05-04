@@ -21,7 +21,7 @@ public class UserController {
     public UserService userService;
 
     @Autowired
-    public UserController(@Qualifier("UserDbStorage") UserStorage userStorage, UserService userService) {
+    public UserController(UserStorage userStorage, UserService userService) {
         this.userStorage = userStorage;
         this.userService = userService;
     }
@@ -75,18 +75,18 @@ public class UserController {
         return true;
     }
 
-    @GetMapping("/users/{id}/friends")
-    public List<User> getFriends(@PathVariable long id) {
-        User user = userStorage.getUsers().get(id);
-
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        return user.getFriendsList().stream()
-                .map(friendId -> userStorage.getUsers().get(friendId))
-                .toList();
-    }
+//    @GetMapping("/users/{id}/friends")
+//    public List<User> getFriends(@PathVariable long id) {
+//        User user = userStorage.getUsers().get(id);
+//
+//        if (user == null) {
+//            throw new NotFoundException("Пользователь не найден");
+//        }
+//
+//        return user.getFriendsList().stream()
+//                .map(friendId -> userStorage.getUsers().get(friendId))
+//                .toList();
+//    }
 
     @PutMapping("/users/{id}/friends/{friendId}")
     public User addFriend(@PathVariable long id, @PathVariable long friendId) {
