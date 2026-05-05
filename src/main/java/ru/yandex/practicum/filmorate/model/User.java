@@ -6,9 +6,7 @@ import ru.yandex.practicum.filmorate.enums.MpaRating;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 @Data
 public class User {
@@ -28,7 +26,7 @@ public class User {
         this.birthday = birthday;
     }
 
-    public User(){
+    public User() {
 
     }
 

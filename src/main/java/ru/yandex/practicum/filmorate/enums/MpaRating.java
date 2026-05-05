@@ -1,5 +1,9 @@
 package ru.yandex.practicum.filmorate.enums;
 
+
+import lombok.Getter;
+
+@Getter
 public enum MpaRating {
     G(1, "G"),
     PG(2, "PG"),
@@ -15,6 +19,7 @@ public enum MpaRating {
         this.name = name;
     }
 
+
     public int getId() {
         return id;
     }
@@ -22,5 +27,7 @@ public enum MpaRating {
     public String getName() {
         return name;
     }
+
+
 }
 

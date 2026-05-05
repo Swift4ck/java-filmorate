@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,7 +37,7 @@ public class UserService {
             log.debug("Нельзя добавть себя в друзья");
         }
 
-        user.getFriendsList().put(addUser.getId() , FriendshipStatus.CONFIRMED);
+        user.getFriendsList().put(addUser.getId(), FriendshipStatus.CONFIRMED);
 
         return user;
     }
@@ -65,7 +64,7 @@ public class UserService {
         return commonFriends;
     }
 
-    public Map<Long ,FriendshipStatus> allFriends(long userId) {
+    public Map<Long, FriendshipStatus> allFriends(long userId) {
         User user = memoryUserStorage.getUsers().get(userId);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
