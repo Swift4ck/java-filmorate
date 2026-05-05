@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS films (
     description VARCHAR(50),
     releaseDate DATE NOT NULL,
     duration INT NOT NULL,
-    mpaId INT NOT NULL,
+    mpaId INT ,
 
     CONSTRAINT filmsMpaFilm FOREIGN KEY (mpaId) REFERENCES mpaFilm(mpaId)
 );
@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS friendships (
 );
 
 CREATE TABLE IF NOT EXISTS filmLikes(
-    filmId INT NOT NULL,
-    userId INT NOT NULL,
+    filmId BIGINT NOT NULL,
+    userId BIGINT NOT NULL,
 
     PRIMARY KEY (filmId, userId),
     CONSTRAINT filmLikesFilm FOREIGN KEY (filmId) REFERENCES films(id),

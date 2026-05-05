@@ -89,7 +89,8 @@ public class UserDbStorage implements UserStorage {
     }
 
 
-    private boolean checkUser(Long id) {
+    @Override
+    public boolean checkUser(Long id) {
         String checkSql = "SELECT COUNT(1) FROM users WHERE id = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, id);
         return count > 0;

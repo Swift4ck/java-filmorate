@@ -3,12 +3,18 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,24 +25,36 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final JdbcTemplate jdbcTemplate;
 
 
     @Autowired
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, @Qualifier("UserDbStorage") UserStorage userStorage) {
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, @Qualifier("UserDbStorage") UserStorage userStorage,
+                       JdbcTemplate jdbcTemplate) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
 
-    public boolean addLike(long id, long userId) {
-        Film film = filmStorage.getFilms().get(id);
 
-        if (film != null) {
-            film.getLikes().add(userId);
-            log.info("Поставлен лайк фильму " + film.getName());
+    public boolean addLike(long filmId, long userId) {
+
+        if (!userStorage.checkUser(userId)) {
+            throw new NotFoundException("Пользователя не существует");
+        }
+
+        String checkSql = "SELECT COUNT(*) FROM filmLikes WHERE filmId = ? AND userId = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, filmId, userId);
+
+        if (count != null && count > 0) {
             return true;
         }
-        return false;
+
+        String sql = "INSERT INTO filmLikes (filmId, userId) VALUES (?, ?)";
+        jdbcTemplate.update(sql, filmId, userId);
+
+        return true;
     }
 
     public boolean removeLike(long id, long userId) {

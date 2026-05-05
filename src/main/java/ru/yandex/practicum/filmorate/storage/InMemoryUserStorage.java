@@ -96,5 +96,9 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Пользователь сохранён в хранилище:");
     }
 
+    @Override
+    public boolean checkUser(Long id) {
+        return true;
+    }
 
 }

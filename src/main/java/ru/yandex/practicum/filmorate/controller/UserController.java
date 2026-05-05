@@ -1,14 +1,20 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.loader.ResourceEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.enums.FriendshipStatus;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.UserRowMapper;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -19,11 +25,16 @@ public class UserController {
 
     public UserStorage userStorage;
     public UserService userService;
+    public JdbcTemplate jdbcTemplate;
+    public UserRowMapper userRowMapper;
 
     @Autowired
-    public UserController(@Qualifier("UserDbStorage") UserStorage userStorage, UserService userService) {
+    public UserController(@Qualifier("UserDbStorage") UserStorage userStorage, UserService userService, JdbcTemplate jdbcTemplate,
+                          UserRowMapper userRowMapper) {
         this.userStorage = userStorage;
         this.userService = userService;
+        this.jdbcTemplate = jdbcTemplate;
+        this.userRowMapper = userRowMapper;
     }
 
     @PostMapping("/users")
@@ -77,57 +88,66 @@ public class UserController {
         return true;
     }
 
-//    @GetMapping("/users/{id}/friends")
-//    public List<User> getFriends(@PathVariable long id) {
-//        User user = userStorage.getUsers().get(id);
-//
-//        if (user == null) {
-//            throw new NotFoundException("Пользователь не найден");
-//        }
-//
-//        return user.getFriendsList().stream()
-//                .map(friendId -> userStorage.getUsers().get(friendId))
-//                .toList();
-//    }
+    @GetMapping("/users/{id}/friends")
+    public List<User> getFriends(@PathVariable("id") long id) {
 
-    @PutMapping("/users/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable long id, @PathVariable long friendId) {
-        User user = userStorage.getUsers().get(id);
-        User friend = userStorage.getUsers().get(friendId);
-
-        if (user == null || friend == null) {
+        if (!userStorage.checkUser(id)) {
             throw new NotFoundException("Пользователь не найден");
         }
 
-        userService.addFriends(user, friend);
-        return user;
+        String sql = """
+                SELECT u.*
+                FROM users AS u
+                JOIN friendships AS f ON u.id = f.friendId
+                WHERE f.userId = ?
+                ORDER BY u.id
+                """;
+
+        return jdbcTemplate.query(sql, userRowMapper, id);
+    }
+
+    @PutMapping("/users/{id}/friends/{friend_id}")
+    public ResponseEntity<Void> addFriend(@PathVariable("id") long id, @PathVariable("friend_id") long friendId) {
+
+        if (!userStorage.checkUser(friendId)) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        String sql = "INSERT INTO friendships (userId, friendId, status) VALUES (?,?,?)";
+
+        jdbcTemplate.update(sql, id, friendId, FriendshipStatus.CONFIRMED.name());
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
-    public User deleteUser(@PathVariable long id, @PathVariable long friendId) {
-        User user = userStorage.getUsers().get(id);
-        User deleteUser = userStorage.getUsers().get(friendId);
+    public ResponseEntity<Void> deleteUser(@PathVariable long id, @PathVariable long friendId) {
 
-        if (user == null || deleteUser == null) {
+        if (!userStorage.checkUser(friendId)) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        if (!userStorage.checkUser(id)) {
             throw new NotFoundException("Пользователь не найден");
         }
 
-        userService.deleteFriends(user, deleteUser);
-        return user;
+        String sql = "DELETE FROM friendships WHERE userId = ? AND friendId = ?";
+
+        jdbcTemplate.update(sql, id, friendId);
+        return ResponseEntity.ok().build();
     }
 
 
     @GetMapping("/users/{id}/friends/common/{otherId}")
     public List<User> commonFriends(@PathVariable long id, @PathVariable long otherId) {
-        User user = userStorage.getUsers().get(id);
-        User otherUser = userStorage.getUsers().get(otherId);
 
-        if (user == null || otherUser == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-        return userService.commonFriends(user, otherUser).stream()
-                .map(friendId -> userStorage.getUsers().get(friendId))
-                .toList();
+        String sql = "SELECT u.* " +
+                "FROM users AS u " +
+                "JOIN friendships AS f1 on u.id = f1.friendId " +
+                "JOIN friendships AS f2 on u.id = f2.friendId " +
+                "WHERE f1.userId = ?" +
+                "AND f2.userId = ?" +
+                "ORDER BY u.id";
+
+        return jdbcTemplate.query(sql, userRowMapper, id, otherId);
     }
 
 

@@ -20,4 +20,5 @@ public interface UserStorage {
 
     Map<Long, User> getUsers();
 
+    boolean checkUser(Long id);
 }

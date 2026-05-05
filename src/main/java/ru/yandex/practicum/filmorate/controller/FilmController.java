@@ -88,15 +88,9 @@ public class FilmController {
         return filmStorage.getFilms();
     }
 
-    @PutMapping("/films/{filmsId}/like/{id}")
-    public boolean addLike(@PathVariable long filmsId, @PathVariable long id) {
-        if (filmStorage.getFilms().get(filmsId) == null) {
-            throw new NotFoundException("Фильм не найден");
-        }
-        if (memoryUserStorage.getUsers().get(id) == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-        return filmService.addLike(filmsId, id);
+    @PutMapping("/films/{film_id}/like/{id}")
+    public boolean addLike(@PathVariable("film_id") long films_id, @PathVariable("id") long id) {
+        return filmService.addLike(films_id, id);
     }
 
 
