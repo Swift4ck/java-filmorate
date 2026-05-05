@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,7 +24,7 @@ public class UserService {
     private final UserStorage memoryUserStorage;
 
     @Autowired
-    public UserService(UserStorage memoryUserStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage memoryUserStorage) {
         this.memoryUserStorage = memoryUserStorage;
     }
 
