@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmRowMapper;
@@ -59,6 +60,7 @@ public class FilmDbStorage implements FilmStorage {
         );
 
         film.setId(keyHolder.getKey().longValue());
+        saveGenreFilm(film);
         return film;
     }
 
@@ -139,20 +141,36 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(long id) {
-        String sql = "SELECT " +
-                " f.id," +
-                "f.name," +
-                "f.description," +
-                "f.releaseDate," +
+        String sql = "SELECT f.id, " +
+                "f.name, " +
+                "f.description, " +
+                "f.releaseDate, " +
                 "f.duration," +
-                "f.mpaId." +
-                "mp.mpaId," +
-                "FROM films AS F" +
-                "JOIN mpaFilm as mf ON f.mpaId = mf.mpId" +
+                "mf.id AS mpaId, " +
+                "mf.name AS mpaName, " +
+                "g.id AS genreId, " +
+                "g.name AS genreName " +
+                "FROM films AS f " +
+                "LEFT JOIN mpaFilm AS mf ON f.mpaId = mf.id " +
+                "LEFT JOIN filmGenres AS fg ON f.id = fg.filmId " +
+                "LEFT JOIN genres AS g ON fg.id = g.id " +
                 "WHERE f.id = ?";
 
         Film film = jdbcTemplate.queryForObject(sql, new Object[]{id}, filmRowMapper);
         return film;
+    }
+
+    public void saveGenreFilm(Film film) {
+        if (film.getGenres() == null) {
+            return;
+        }
+        String sql = "INSERT INTO filmGenres (filmId, id) VALUES  (?,?)";
+
+        jdbcTemplate.batchUpdate(sql, film.getGenres(), film.getGenres().size(),
+                (ps, genre) -> {
+                    ps.setLong(1, film.getId());
+                    ps.setLong(2, genre.getId());
+                });
     }
 
 

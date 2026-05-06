@@ -36,7 +36,9 @@ public class FilmController {
     @PostMapping("/films")
     public Film create(@RequestBody Film film) {
         filmStorage.checkValidationFilm(film);
-        return filmStorage.create(film);
+        filmService.checkMpa(film);
+        Film filmCreate = filmStorage.create(film);
+        return filmStorage.getFilmById(film.getId());
     }
 
 
@@ -60,37 +62,14 @@ public class FilmController {
     }
 
 
-    public boolean checkValidationFilm(Film film) {
-        if (film.getName().isEmpty()) {
-            log.debug("Пустое названия фильма");
-            throw new ValidationException("название не может быть пустым.");
-        }
-
-        if (film.getDescription().length() > 200) {
-            log.debug("описания длинное");
-            throw new ValidationException("максимальная длина описания — 200 символов.");
-        }
-
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.debug("не коректная дата");
-            throw new ValidationException("дата релиза — не раньше 28 декабря 1895 года.");
-        }
-
-        if (film.getDuration() < 0) {
-            log.debug("продолжительность отрицательное число");
-            throw new ValidationException("продолжительность фильма должна быть положительным числом.");
-        }
-        return true;
-    }
-
 
     public Map<Long, Film> getFilms() {
         return filmStorage.getFilms();
     }
 
     @PutMapping("/films/{film_id}/like/{id}")
-    public boolean addLike(@PathVariable("film_id") long films_id, @PathVariable("id") long id) {
-        return filmService.addLike(films_id, id);
+    public void addLike(@PathVariable("film_id") long films_id, @PathVariable("id") long id) {
+        filmService.addLike(films_id, id);
     }
 
 
@@ -114,6 +93,7 @@ public class FilmController {
     public Film getFilmById(@PathVariable long id) {
         return filmStorage.getFilmById(id);
     }
+
 
 
 }

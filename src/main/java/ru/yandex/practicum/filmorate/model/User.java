@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
 import ru.yandex.practicum.filmorate.enums.FriendshipStatus;
-import ru.yandex.practicum.filmorate.enums.MpaRating;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -15,7 +14,6 @@ public class User {
     private String login;
     private String name;
     private LocalDate birthday;
-    private MpaRating mpa;
     private Map<Long, FriendshipStatus> friendsList = new HashMap<>();
 
     public User(long id, String email, String login, String name, LocalDate birthday) {

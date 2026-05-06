@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
@@ -38,23 +39,13 @@ public class FilmService {
 
 
 
-    public boolean addLike(long filmId, long userId) {
-
+    public void addLike(Long filmId, Long userId) {
         if (!userStorage.checkUser(userId)) {
-            throw new NotFoundException("Пользователя не существует");
-        }
-
-        String checkSql = "SELECT COUNT(*) FROM filmLikes WHERE filmId = ? AND userId = ?";
-        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, filmId, userId);
-
-        if (count != null && count > 0) {
-            return true;
+            throw new NotFoundException("Пользователя с таким id нет");
         }
 
         String sql = "INSERT INTO filmLikes (filmId, userId) VALUES (?, ?)";
         jdbcTemplate.update(sql, filmId, userId);
-
-        return true;
     }
 
     public boolean removeLike(long id, long userId) {
@@ -75,6 +66,12 @@ public class FilmService {
                 .limit(count)
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
+    }
+
+    public void checkMpa(Film film) {
+        if (film.getMpa() == null || film.getMpa().getId() == 0) {
+            throw new ValidationException("MPA должен быть указан");
+        }
     }
 
 
