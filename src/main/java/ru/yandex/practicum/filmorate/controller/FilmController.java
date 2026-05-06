@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
@@ -66,8 +65,8 @@ public class FilmController {
     }
 
     @PutMapping("/films/{film_id}/like/{id}")
-    public void addLike(@PathVariable("film_id") long films_id, @PathVariable("id") long id) {
-        filmService.addLike(films_id, id);
+    public void addLike(@PathVariable("film_id") long filmsId, @PathVariable("id") long id) {
+        filmService.addLike(filmsId, id);
     }
 
 
