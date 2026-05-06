@@ -6,15 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.GenreService;
-import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.inter.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
 import java.util.Collection;
 
@@ -37,7 +32,7 @@ public class GenreController {
     }
 
     @GetMapping("/genres")
-    public Collection<Genre> getGenres(){
+    public Collection<Genre> getGenres() {
         return genreService.getAllGenres();
     }
 

@@ -26,7 +26,7 @@ public class GenreDbStorage implements GenreStorage {
     private final GenreRowMapper genreRowMapper;
 
     @Override
-    public Genre create(Genre genre){
+    public Genre create(Genre genre) {
         String sql = "INSERT INTO genres (name) VALUES (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -43,9 +43,9 @@ public class GenreDbStorage implements GenreStorage {
 
 
     @Override
-    public Optional<Genre> findById(Long id){
-            List<Genre> genres = jdbcTemplate.query("SELECT * FROM genres WHERE id = ?", genreRowMapper, id);
-            return genres.stream().findFirst();
+    public Optional<Genre> findById(Long id) {
+        List<Genre> genres = jdbcTemplate.query("SELECT * FROM genres WHERE id = ?", genreRowMapper, id);
+        return genres.stream().findFirst();
     }
 
 

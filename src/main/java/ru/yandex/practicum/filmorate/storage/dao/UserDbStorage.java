@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.storage.mapper.UserRowMapper;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +48,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User updateUser) {
-        if (!checkUser(updateUser.getId())){
+        if (!checkUser(updateUser.getId())) {
             throw new NotFoundException("Пользователя с таким id нет");
         }
 
@@ -57,7 +56,7 @@ public class UserDbStorage implements UserStorage {
                 "WHERE id = ?";
 
         jdbcTemplate.update(sql,
-               updateUser.getEmail(),
+                updateUser.getEmail(),
                 updateUser.getLogin(),
                 updateUser.getName(),
                 Date.valueOf(updateUser.getBirthday()),

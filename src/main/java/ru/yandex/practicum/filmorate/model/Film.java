@@ -31,7 +31,7 @@ public class Film {
         this.genres = new HashSet<>();
     }
 
-    public Film(long id, String name, String description, LocalDate releaseDate, int duration,  Mpa mpa) {
+    public Film(long id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
         this.id = id;
         this.name = name;
         this.description = description;

@@ -7,10 +7,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.inter.MpaStorage;
-import ru.yandex.practicum.filmorate.storage.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.MpaRowMapper;
 
 import java.util.Collection;
@@ -26,7 +24,7 @@ public class MpaDbStorage implements MpaStorage {
     private final MpaRowMapper mpaRowMapper;
 
     @Override
-    public List<Mpa> getAllMpa(){
+    public List<Mpa> getAllMpa() {
         return jdbcTemplate.query("SELECT * FROM mpaFilm", mpaRowMapper);
     }
 
@@ -35,7 +33,7 @@ public class MpaDbStorage implements MpaStorage {
         try {
             return jdbcTemplate.queryForObject(
                     "SELECT * FROM mpaFilm WHERE id = ?",
-                    new Object[] { id },
+                    new Object[]{id},
                     mpaRowMapper
             );
         } catch (EmptyResultDataAccessException e) {

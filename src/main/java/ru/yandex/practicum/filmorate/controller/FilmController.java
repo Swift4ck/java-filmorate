@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -62,7 +61,6 @@ public class FilmController {
     }
 
 
-
     public Map<Long, Film> getFilms() {
         return filmStorage.getFilms();
     }
@@ -93,7 +91,6 @@ public class FilmController {
     public Film getFilmById(@PathVariable long id) {
         return filmStorage.getFilmById(id);
     }
-
 
 
 }

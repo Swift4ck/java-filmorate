@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -14,8 +12,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,7 +32,6 @@ public class FilmService {
         this.userStorage = userStorage;
         this.jdbcTemplate = jdbcTemplate;
     }
-
 
 
     public void addLike(Long filmId, Long userId) {

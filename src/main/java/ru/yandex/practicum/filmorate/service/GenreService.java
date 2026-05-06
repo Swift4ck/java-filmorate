@@ -25,7 +25,7 @@ public class GenreService {
         return genreStorage.findById(id).orElseThrow(() -> new NotFoundException("Genre not found"));
     }
 
-    public List<Genre> getAllGenres(){
+    public List<Genre> getAllGenres() {
         return genreStorage.findAllGenres();
     }
 

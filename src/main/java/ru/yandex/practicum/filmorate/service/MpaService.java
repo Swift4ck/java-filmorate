@@ -16,22 +16,22 @@ public class MpaService {
 
     private final MpaDbStorage mpaDbStorage;
 
-    public MpaService(@Qualifier("MpaDbStorage") MpaDbStorage mpaDbStorage){
+    public MpaService(@Qualifier("MpaDbStorage") MpaDbStorage mpaDbStorage) {
         this.mpaDbStorage = mpaDbStorage;
     }
 
-    public List<Mpa> getAllMpa(){
+    public List<Mpa> getAllMpa() {
         return mpaDbStorage.getAllMpa();
     }
 
 
-    public Mpa getById(long id){
+    public Mpa getById(long id) {
         return mpaDbStorage.getById(id);
     }
 
-    public boolean checkMpaValid(long id){
+    public boolean checkMpaValid(long id) {
         Mpa mpa = mpaDbStorage.getById(id);
-        if (mpa == null){
+        if (mpa == null) {
             throw new NotFoundException("Id mpa не существует");
         }
         return true;
