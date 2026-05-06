@@ -11,9 +11,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.inter.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MpaRowMapper;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @Qualifier("MpaDbStorage")
