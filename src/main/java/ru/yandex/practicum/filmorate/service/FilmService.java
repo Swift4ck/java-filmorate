@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
@@ -62,14 +61,14 @@ public class FilmService {
             throw new ValidationException("MPA должен быть указан");
         }
 
-        if(film.getMpa().getId() > 5){
+        if (film.getMpa().getId() > 5) {
             throw new NotFoundException("id Mpa не существует");
         }
     }
 
-    public void checkGenre (Film film){
-        for (Genre g: film.getGenres()){
-            if (g.getId() > 6){
+    public void checkGenre(Film film) {
+        for (Genre g : film.getGenres()) {
+            if (g.getId() > 6) {
                 throw new NotFoundException("id жанра не существует");
             }
         }
