@@ -35,16 +35,13 @@ public class FilmController {
     public Film create(@RequestBody Film film) {
         filmStorage.checkValidationFilm(film);
         filmService.checkMpa(film);
-        Film filmCreate = filmStorage.create(film);
-        return filmStorage.getFilmById(film.getId());
+        filmService.checkGenre(film);
+        return filmStorage.create(film);
     }
 
 
     @PutMapping("/films")
     public Film update(@RequestBody Film updatedFilm) {
-        if (updatedFilm == null) {
-            throw new NotFoundException("Фильм не найден");
-        }
         return filmStorage.update(updatedFilm);
     }
 
@@ -54,6 +51,10 @@ public class FilmController {
         return filmStorage.filmAll();
     }
 
+    @GetMapping("/films/{id}")
+    public Film getFilById(@PathVariable("id")long id){
+       return filmStorage.getFilmById(id);
+    }
 
     public void clearFilm() {
         filmStorage.clearFilm();
@@ -71,14 +72,8 @@ public class FilmController {
 
 
     @DeleteMapping("/films/{filmsId}/like/{id}")
-    public boolean removeLikeFilm(@PathVariable long filmsId, @PathVariable long id) {
-        if (filmStorage.getFilms().get(filmsId) == null) {
-            throw new NotFoundException("Фильм не найден");
-        }
-        if (memoryUserStorage.getUsers().get(id) == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-        return filmService.removeLike(filmsId, id);
+    public void removeLikeFilm(@PathVariable long filmsId, @PathVariable long id) {
+         filmService.removeLike(filmsId, id);
     }
 
     @GetMapping("/films/popular")

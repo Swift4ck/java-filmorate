@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
@@ -43,29 +44,34 @@ public class FilmService {
         jdbcTemplate.update(sql, filmId, userId);
     }
 
-    public boolean removeLike(long id, long userId) {
-        Film film = filmStorage.getFilms().get(id);
-        User user = userStorage.getUsers().get(userId);
-
-        if (film != null && film.getLikes().contains(user.getId())) {
-            film.getLikes().remove(user.getId());
-            log.info("Пользователь " + user.getLogin() + " убрал лайк фильму " + film.getName());
-            return true;
+    public void removeLike(long id, long userId) {
+        if (!userStorage.checkUser(userId)) {
+            throw new NotFoundException("Пользователя с таким id нет");
         }
-        return false;
+
+        String sql = "DELETE FROM filmLikes WHERE filmId = ? AND userId = ?";
+        jdbcTemplate.update(sql, id, userId);
     }
 
     public List<Film> getTopFilms(int count) {
-        return filmStorage.getFilms().entrySet().stream()
-                .sorted((list1, list2) -> Integer.compare(list2.getValue().getLikes().size(), list1.getValue().getLikes().size()))
-                .limit(count)
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+        return filmStorage.getCount(count);
     }
 
     public void checkMpa(Film film) {
         if (film.getMpa() == null || film.getMpa().getId() == 0) {
             throw new ValidationException("MPA должен быть указан");
+        }
+
+        if(film.getMpa().getId() > 5){
+            throw new NotFoundException("id Mpa не существует");
+        }
+    }
+
+    public void checkGenre (Film film){
+        for (Genre g: film.getGenres()){
+            if (g.getId() > 6){
+                throw new NotFoundException("id жанра не существует");
+            }
         }
     }
 

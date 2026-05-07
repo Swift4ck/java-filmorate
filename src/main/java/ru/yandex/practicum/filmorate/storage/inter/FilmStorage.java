@@ -21,6 +21,6 @@ public interface FilmStorage {
 
     Film getFilmById(long id);
 
-
+    List<Film> getCount(int count);
 }
 

@@ -7,10 +7,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.mapper.GenreRowMapper;
 
 import java.sql.Date;
 
@@ -18,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +33,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final FilmRowMapper filmRowMapper;
+    private final GenreRowMapper genreRowMapper;
 
     @Override
     public Film create(Film film) {
@@ -60,12 +65,24 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId(keyHolder.getKey().longValue());
         saveGenreFilm(film);
+
+        String genreSql = """
+                SELECT g.id, g.name
+                FROM filmGenres fg
+                JOIN genres g ON g.id = fg.id
+                WHERE fg.filmId = ?
+                """;
+        List<Genre> genres = jdbcTemplate.query(genreSql, genreRowMapper, film.getId());
+        film.setGenres(new LinkedHashSet<>(genres));
+
         return film;
     }
 
 
     @Override
     public Film update(Film updateFilm) {
+
+        checkFilmId(updateFilm);
 
         String sql = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ?, mpaId = ?" +
                 "WHERE id = ?";
@@ -83,23 +100,29 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> filmAll() {
-        String sql = "SELECT " +
-                "f.id, " +
-                "f.name, " +
-                "f.description, " +
-                "f.releaseDate, " +
-                "f.duration, " +
-                "f.mpaId, " +
-                "mf.name AS mpaName, " +
-                "g.genreId, " +
-                "g.name AS genreName " +
-                "FROM films AS f " +
-                "JOIN mpaFilm AS mf ON f.mpaId = mf.id " +
-                "LEFT JOIN filmGenres AS fg ON f.id = fg.filmId " +
-                "LEFT JOIN genres AS g ON fg.genreId = g.genreId " +
-                "ORDER BY f.id, g.genreId";
+        String sql = "SELECT  " +
+                "    f.id,  " +
+                "    f.name,  " +
+                "    f.description,  " +
+                "    f.releaseDate,  " +
+                "    f.duration,  " +
+                "    f.mpaId,  " +
+                "    mf.name AS mpaName,  " +
+                "    fg.id AS genreId,  " +
+                "    g.name AS genreName  " +
+                "FROM  " +
+                "    films AS f  " +
+                "JOIN  " +
+                "    mpaFilm AS mf ON f.mpaId = mf.id  " +
+                "LEFT JOIN " +
+                "    filmGenres AS fg ON f.id = fg.filmId " +
+                "LEFT JOIN " +
+                "    genres AS g ON fg.id = g.id " +
+                "ORDER BY " +
+                "    f.id, fg.id;";
 
         List<Film> films = jdbcTemplate.query(sql, filmRowMapper);
+
         return films;
     }
 
@@ -140,24 +163,34 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(long id) {
-        String sql = "SELECT f.id, " +
+        String sql = "SELECT " +
+                "f.id, " +
                 "f.name, " +
                 "f.description, " +
                 "f.releaseDate, " +
-                "f.duration," +
+                "f.duration, " +
                 "mf.id AS mpaId, " +
-                "mf.name AS mpaName, " +
-                "g.id AS genreId, " +
-                "g.name AS genreName " +
-                "FROM films AS f " +
-                "LEFT JOIN mpaFilm AS mf ON f.mpaId = mf.id " +
-                "LEFT JOIN filmGenres AS fg ON f.id = fg.filmId " +
-                "LEFT JOIN genres AS g ON fg.id = g.id " +
+                "mf.name AS mpaName " +
+                "FROM films f " +
+                "LEFT JOIN mpaFilm mf ON f.mpaId = mf.id " +
                 "WHERE f.id = ?";
 
         Film film = jdbcTemplate.queryForObject(sql, new Object[]{id}, filmRowMapper);
+
+        String genreSql = "SELECT " +
+                "g.id , " +
+                "g.name, " +
+                "FROM filmGenres AS fg " +
+                "JOIN genres g ON g.id = fg.id " +
+                "WHERE fg.filmId = ? " +
+                "ORDER BY g.id";
+
+        List<Genre> genres = jdbcTemplate.query(genreSql, genreRowMapper, film.getId());
+        film.setGenres(new LinkedHashSet<>(genres));
+
         return film;
     }
+
 
     public void saveGenreFilm(Film film) {
         if (film.getGenres() == null) {
@@ -170,6 +203,35 @@ public class FilmDbStorage implements FilmStorage {
                     ps.setLong(1, film.getId());
                     ps.setLong(2, genre.getId());
                 });
+    }
+
+    public void checkFilmId(Film film) {
+        String checkSql = "SELECT COUNT(*) FROM films WHERE id = ?";
+        int count = jdbcTemplate.queryForObject(checkSql, Integer.class, film.getId());
+        if (count == 0) {
+            throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
+        }
+    }
+
+    @Override
+    public List<Film> getCount(int count) {
+        String sqlQuery = "SELECT " +
+                "f.id, " +
+                "f.name, " +
+                "f.description, " +
+                "f.releaseDate, " +
+                "f.duration, " +
+                "f.mpaId, " +
+                "mpa.name AS mpaName , " +
+                "COUNT (fl.userId) AS likes_count " +
+                "FROM films AS f " +
+                "LEFT OUTER JOIN mpaFilm AS mpa ON f.mpaId = mpa.id " +
+                "LEFT OUTER JOIN filmLikes AS fl ON f.id = fl.filmId " +
+                "GROUP BY f.id , f.name , f.description, f.releaseDate, f.duration, mpa.name " +
+                "ORDER BY likes_count DESC " +
+                "LIMIT ? ";
+
+        return jdbcTemplate.query(sqlQuery, filmRowMapper, count);
     }
 
 

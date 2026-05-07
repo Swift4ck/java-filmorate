@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
@@ -43,7 +44,7 @@ class FilmorateApplicationTests {
     @Test
     @DisplayName("Успешно создаем фильм")
     void successfulFilmСreation() {
-        Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60);
+        Film film = new Film(1, "Название фильма", "Описание фильма", LocalDate.of(2025, 3, 24), 60, new Mpa());
 
         Film createFilm = filmController.create(film);
         assertEquals(createFilm, film, "Успешно создаем фильм");
