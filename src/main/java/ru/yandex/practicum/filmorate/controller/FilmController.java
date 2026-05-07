@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.inter.FilmStorage;
@@ -42,6 +41,7 @@ public class FilmController {
 
     @PutMapping("/films")
     public Film update(@RequestBody Film updatedFilm) {
+        filmStorage.checkValidationFilm(updatedFilm);
         return filmStorage.update(updatedFilm);
     }
 
@@ -52,8 +52,8 @@ public class FilmController {
     }
 
     @GetMapping("/films/{id}")
-    public Film getFilById(@PathVariable("id")long id){
-       return filmStorage.getFilmById(id);
+    public Film getFilById(@PathVariable("id") long id) {
+        return filmStorage.getFilmById(id);
     }
 
     public void clearFilm() {
@@ -73,7 +73,7 @@ public class FilmController {
 
     @DeleteMapping("/films/{filmsId}/like/{id}")
     public void removeLikeFilm(@PathVariable long filmsId, @PathVariable long id) {
-         filmService.removeLike(filmsId, id);
+        filmService.removeLike(filmsId, id);
     }
 
     @GetMapping("/films/popular")
