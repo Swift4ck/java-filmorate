@@ -100,8 +100,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getCount(int count){
-        List <Film> l = new ArrayList<>();
+    public List<Film> getCount(int count) {
+        List<Film> l = new ArrayList<>();
         return l;
     }
 }
