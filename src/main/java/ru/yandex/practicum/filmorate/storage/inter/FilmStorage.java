@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.inter;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -21,6 +21,6 @@ public interface FilmStorage {
 
     Film getFilmById(long id);
 
-
+    List<Film> getCount(int count);
 }
 

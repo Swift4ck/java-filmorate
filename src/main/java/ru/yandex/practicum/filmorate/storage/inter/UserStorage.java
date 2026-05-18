@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.inter;
 
 
 import ru.yandex.practicum.filmorate.model.User;
@@ -20,4 +20,5 @@ public interface UserStorage {
 
     Map<Long, User> getUsers();
 
+    boolean checkUser(Long id);
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.inter.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -93,6 +94,11 @@ public class InMemoryUserStorage implements UserStorage {
     public void refreshMap(User user) {
         users.put(user.getId(), user);
         log.info("Пользователь сохранён в хранилище:");
+    }
+
+    @Override
+    public boolean checkUser(Long id) {
+        return true;
     }
 
 }
